@@ -34,7 +34,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message || 'Server Error' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`\n🏥  MediBook Server running on http://localhost:${PORT}`);
 });
