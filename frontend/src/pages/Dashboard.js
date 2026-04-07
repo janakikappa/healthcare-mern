@@ -7,7 +7,20 @@ import Navbar from '../components/Navbar';
 const fmtDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
 const StatusBadge = ({ status }) => (
-  <span className={`badge badge-${status}`}>{status}</span>
+  <span style={{
+    padding: '4px 10px',
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 600,
+    background:
+      status === 'confirmed' ? '#dcfce7' :
+      status === 'pending' ? '#fef3c7' :
+      '#e0f2fe',
+    color:
+      status === 'confirmed' ? '#16a34a' :
+      status === 'pending' ? '#d97706' :
+      '#0284c7'
+  }}>{status}</span>
 );
 
 const StatCard = ({ num, label, color, icon }) => (
@@ -29,15 +42,15 @@ const QuickCard = ({ icon, title, desc, btnText, btnColor, onClick }) => (
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const navigate  = useNavigate();
-  const [appts,   setAppts]   = useState([]);
+  const navigate = useNavigate();
+  const [appts, setAppts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetch = async () => {
       try {
         let res;
-        if (user?.role === 'admin')  res = await getAllAppointments();
+        if (user?.role === 'admin') res = await getAllAppointments();
         else if (user?.role === 'doctor') res = await getDoctorAppointments();
         else res = await getMyAppointments();
         setAppts(res.data);
@@ -47,37 +60,38 @@ const Dashboard = () => {
     fetch();
   }, [user]);
 
-  const pending   = appts.filter(a => a.status === 'pending').length;
+  const pending = appts.filter(a => a.status === 'pending').length;
   const confirmed = appts.filter(a => a.status === 'confirmed').length;
   const completed = appts.filter(a => a.status === 'completed').length;
- 
+
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
     <div style={S.page}>
       <Navbar />
-      <div style={S.wrap}>
 
-        {/* Header */}
-        <div style={S.header}>
-          <div>
-            <h1 style={S.greeting}>{greet}, {user?.name?.split(' ')[0]}! 👋</h1>
-            <p style={S.greetSub}>
-              {user?.role === 'doctor' ? 'Doctor Dashboard — Manage your patient appointments' :
-               user?.role === 'admin'  ? 'Admin Dashboard — Full system overview and control' :
-               'Patient Dashboard — Your health at a glance'}
-            </p>
-          </div>
-          <div style={S.headerBadge}>
-            <span style={S.rolePill}>{user?.role?.toUpperCase()}</span>
-          </div>
+      {/* 🔥 HERO SECTION */}
+      <div style={S.hero}>
+        <div style={S.heroOverlay}></div>
+
+        <div style={S.heroContent}>
+          <h1 style={S.greeting}>{greet}, {user?.name?.split(' ')[0]}! 👋</h1>
+          <p style={S.greetSub}>
+            {user?.role === 'doctor' ? 'Doctor Dashboard — Manage your patient appointments' :
+             user?.role === 'admin' ? 'Admin Dashboard — Full system overview and control' :
+             'Patient Dashboard — Your health at a glance'}
+          </p>
+          <span style={S.rolePill}>{user?.role?.toUpperCase()}</span>
         </div>
+      </div>
+
+      <div style={S.wrap}>
 
         {/* Stats */}
         <div style={S.stats}>
-          <StatCard num={appts.length} label={user?.role === 'doctor' ? 'Total Patients' : 'Total Appointments'} color="#6366f1" icon="📋" />
-          <StatCard num={pending}   label="Pending"   color="#f59e0b" icon="⏳" />
+          <StatCard num={appts.length} label="Total Appointments" color="#6366f1" icon="📋" />
+          <StatCard num={pending} label="Pending" color="#f59e0b" icon="⏳" />
           <StatCard num={confirmed} label="Confirmed" color="#22c55e" icon="✅" />
           <StatCard num={completed} label="Completed" color="#0ea5e9" icon="🏁" />
         </div>
@@ -85,124 +99,147 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <h2 style={S.sectionTitle}>Quick Actions</h2>
         <div style={S.quickGrid}>
-          {user?.role === 'patient' && <>
-            <QuickCard icon="📅" title="Book Appointment" desc="Schedule a visit with a specialist" btnText="Book Now" btnColor="#6366f1" onClick={() => navigate('/book')} />
-            <QuickCard icon="👨‍⚕️" title="Find Doctors" desc="Browse our verified specialists" btnText="View Doctors" btnColor="#0ea5e9" onClick={() => navigate('/doctors')} />
-            <QuickCard icon="📋" title="My Appointments" desc="View, track and manage your bookings" btnText="View All" btnColor="#f59e0b" onClick={() => navigate('/appointments')} />
-          </>}
-          {user?.role === 'doctor' && <>
-            <QuickCard icon="🗓️" title="Today's Schedule" desc="View your patient appointments" btnText="View Schedule" btnColor="#0ea5e9" onClick={() => navigate('/appointments')} />
-            <QuickCard icon="⏳" title={`${pending} Pending`} desc="Appointments waiting for confirmation" btnText="Review Now" btnColor="#f59e0b" onClick={() => navigate('/appointments')} />
-            <QuickCard icon="✅" title={`${confirmed} Confirmed`} desc="Upcoming confirmed appointments" btnText="View All" btnColor="#22c55e" onClick={() => navigate('/appointments')} />
-          </>}
-          {user?.role === 'admin' && <>
-            <QuickCard icon="👨‍⚕️" title="Manage Doctors" desc="Add, edit or remove doctors" btnText="Manage" btnColor="#0ea5e9" onClick={() => navigate('/doctors')} />
-            <QuickCard icon="📊" title="All Appointments" desc="Monitor all system appointments" btnText="View All" btnColor="#6366f1" onClick={() => navigate('/appointments')} />
-            <QuickCard icon="👥" title="Manage Users" desc="View and manage all users" btnText="View Users" btnColor="#f59e0b" onClick={() => navigate('/users')} />
-          </>}
+          <QuickCard icon="📅" title="Book Appointment" desc="Schedule a visit" btnText="Book Now" onClick={() => navigate('/book')} />
+          <QuickCard icon="👨‍⚕️" title="Find Doctors" desc="Browse specialists" btnText="View Doctors" onClick={() => navigate('/doctors')} />
+          <QuickCard icon="📋" title="My Appointments" desc="Manage bookings" btnText="View All" onClick={() => navigate('/appointments')} />
         </div>
 
-        {/* Recent Appointments */}
+        {/* Table */}
         <div style={S.tableCard}>
           <div style={S.tableHeader}>
-            <h2 style={S.tableTitle}>
-              {user?.role === 'doctor' ? '🗓️ Your Appointments' :
-               user?.role === 'admin'  ? '📊 Recent Appointments' : '📋 Your Recent Appointments'}
-            </h2>
+            <h2>Your Recent Appointments</h2>
             <button style={S.viewAllBtn} onClick={() => navigate('/appointments')}>View All →</button>
           </div>
 
           {loading ? (
-            <div style={S.loadingWrap}><div className="spinner"></div></div>
-          ) : appts.length === 0 ? (
-            <div style={S.empty}>
-              <div style={S.emptyIcon}>📭</div>
-              <p style={S.emptyText}>No appointments yet</p>
-              {user?.role === 'patient' && (
-                <button style={S.emptyBtn} onClick={() => navigate('/book')}>Book Your First Appointment</button>
-              )}
-            </div>
+            <p style={{ textAlign: 'center' }}>Loading...</p>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={S.table}>
-                <thead>
-                  <tr style={S.thead}>
-                    {user?.role === 'patient' && <><th style={S.th}>Doctor</th><th style={S.th}>Specialization</th><th style={S.th}>Date</th><th style={S.th}>Time</th><th style={S.th}>Status</th></>}
-                    {user?.role === 'doctor'  && <><th style={S.th}>Patient</th><th style={S.th}>Date</th><th style={S.th}>Time</th><th style={S.th}>Symptoms</th><th style={S.th}>Status</th></>}
-                    {user?.role === 'admin'   && <><th style={S.th}>Patient</th><th style={S.th}>Doctor</th><th style={S.th}>Date</th><th style={S.th}>Time</th><th style={S.th}>Status</th></>}
+            <table style={S.table}>
+              <thead>
+                <tr>
+                  <th style={S.th}>Doctor</th>
+                  <th style={S.th}>Date</th>
+                  <th style={S.th}>Time</th>
+                  <th style={S.th}>Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {appts.slice(0, 5).map(a => (
+                  <tr key={a._id}>
+                    <td style={S.td}>{a.doctorId?.userId?.name}</td>
+                    <td style={S.td}>{fmtDate(a.appointmentDate)}</td>
+                    <td style={S.td}>{a.timeSlot}</td>
+                    <td style={S.td}><StatusBadge status={a.status} /></td>
                   </tr>
-                </thead>
-                <tbody>
-                  {appts.slice(0, 5).map(a => (
-                    <tr key={a._id} style={S.tr}>
-                      {user?.role === 'patient' && <>
-                        <td style={S.td}><strong>{a.doctorId?.userId?.name || 'Doctor'}</strong></td>
-                        <td style={S.td}><span style={S.specTag}>{a.doctorId?.specialization}</span></td>
-                        <td style={S.td}>{fmtDate(a.appointmentDate)}</td>
-                        <td style={S.td}>{a.timeSlot}</td>
-                        <td style={S.td}><StatusBadge status={a.status} /></td>
-                      </>}
-                      {user?.role === 'doctor' && <>
-                        <td style={S.td}><strong>{a.patientId?.name || 'Patient'}</strong></td>
-                        <td style={S.td}>{fmtDate(a.appointmentDate)}</td>
-                        <td style={S.td}>{a.timeSlot}</td>
-                        <td style={{ ...S.td, color: '#64748b', maxWidth: 160 }}>{a.symptoms?.slice(0, 35)}...</td>
-                        <td style={S.td}><StatusBadge status={a.status} /></td>
-                      </>}
-                      {user?.role === 'admin' && <>
-                        <td style={S.td}>{a.patientId?.name}</td>
-                        <td style={S.td}>{a.doctorId?.userId?.name}</td>
-                        <td style={S.td}>{fmtDate(a.appointmentDate)}</td>
-                        <td style={S.td}>{a.timeSlot}</td>
-                        <td style={S.td}><StatusBadge status={a.status} /></td>
-                      </>}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
+
       </div>
     </div>
   );
 };
 
 const S = {
-  page:       { minHeight: '100vh', background: '#f8fafc' },
-  wrap:       { maxWidth: 1200, margin: '0 auto', padding: '32px 24px 48px' },
-  header:     { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 },
-  greeting:   { fontFamily: 'Poppins, sans-serif', fontSize: 28, fontWeight: 700, color: '#0f172a', marginBottom: 4 },
-  greetSub:   { fontSize: 14, color: '#64748b' },
-  headerBadge:{ flexShrink: 0 },
-  rolePill:   { background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', padding: '6px 16px', borderRadius: 999, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em' },
-  stats:      { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 32 },
-  stat:       { background: '#fff', borderRadius: 14, padding: '20px 22px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: 8 },
-  statIcon:   { width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 },
-  statNum:    { fontFamily: 'Poppins, sans-serif', fontSize: 32, fontWeight: 800, lineHeight: 1 },
-  statLabel:  { fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' },
-  sectionTitle:{ fontFamily: 'Poppins, sans-serif', fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 16 },
-  quickGrid:  { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18, marginBottom: 32 },
-  qCard:      { background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', transition: 'all .2s', border: '1px solid #f1f5f9' },
-  qIcon:      { fontSize: 36, marginBottom: 12 },
-  qTitle:     { fontFamily: 'Poppins, sans-serif', fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 6 },
-  qDesc:      { fontSize: 13, color: '#64748b', marginBottom: 18, lineHeight: 1.5 },
-  qBtn:       { padding: '9px 20px', color: '#fff', border: 'none', borderRadius: 9, fontSize: 13, fontWeight: 600, cursor: 'pointer' },
-  tableCard:  { background: '#fff', borderRadius: 16, padding: '24px 0', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', overflow: 'hidden' },
-  tableHeader:{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px 20px' },
-  tableTitle: { fontFamily: 'Poppins, sans-serif', fontSize: 16, fontWeight: 700, color: '#0f172a' },
-  viewAllBtn: { padding: '6px 16px', background: '#eef2ff', color: '#6366f1', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' },
-  table:      { width: '100%', borderCollapse: 'collapse' },
-  thead:      { background: '#f8fafc' },
-  th:         { padding: '10px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #f1f5f9' },
-  tr:         { borderBottom: '1px solid #f8fafc', transition: 'background .15s' },
-  td:         { padding: '14px 20px', fontSize: 14, color: '#334155' },
-  specTag:    { background: '#eef2ff', color: '#6366f1', padding: '2px 9px', borderRadius: 6, fontSize: 12, fontWeight: 600 },
-  loadingWrap:{ display: 'flex', justifyContent: 'center', padding: '48px 0' },
-  empty:      { textAlign: 'center', padding: '48px 20px' },
-  emptyIcon:  { fontSize: 48, marginBottom: 12 },
-  emptyText:  { fontSize: 16, color: '#94a3b8', marginBottom: 16 },
-  emptyBtn:   { padding: '10px 24px', background: '#6366f1', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  page: { minHeight: '100vh', background: '#f1f5f9' },
+
+  hero: {
+    height: 260,
+    background: `url('/images/hospital.png') center/cover no-repeat`,
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+
+  heroOverlay: {
+    position: 'absolute',
+    inset: 0,
+    background: 'rgba(0,0,0,0.55)'
+  },
+
+  heroContent: {
+    position: 'relative',
+    zIndex: 2,
+    color: '#fff',
+    padding: '0 40px'
+  },
+
+  greeting: {
+    fontSize: 34,
+    fontWeight: 800,
+    marginBottom: 6
+  },
+
+  greetSub: {
+    fontSize: 15,
+    opacity: 0.9,
+    marginBottom: 10
+  },
+
+  rolePill: {
+    background: '#6366f1',
+    padding: '6px 16px',
+    borderRadius: 20,
+    fontSize: 12,
+    fontWeight: 700
+  },
+
+  wrap: { maxWidth: 1200, margin: '0 auto', padding: '32px 24px' },
+
+  stats: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 32 },
+
+  stat: {
+    background: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+  },
+
+  statIcon: { width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+
+  statNum: { fontSize: 30, fontWeight: 800 },
+
+  statLabel: { fontSize: 12, color: '#64748b' },
+
+  sectionTitle: { fontSize: 18, fontWeight: 700, marginBottom: 16 },
+
+  quickGrid: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20, marginBottom: 32 },
+
+  qCard: {
+    background: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
+    transition: '0.3s'
+  },
+
+  qIcon: { fontSize: 36, marginBottom: 10 },
+
+  qTitle: { fontSize: 16, fontWeight: 700 },
+
+  qDesc: { fontSize: 13, color: '#64748b', marginBottom: 16 },
+
+  qBtn: { padding: '8px 18px', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' },
+
+  tableCard: {
+    background: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+  },
+
+  tableHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: 16 },
+
+  viewAllBtn: { background: '#eef2ff', border: 'none', padding: '6px 14px', borderRadius: 8, cursor: 'pointer' },
+
+  table: { width: '100%', borderCollapse: 'collapse' },
+
+  th: { textAlign: 'left', padding: 10, fontSize: 12, color: '#64748b' },
+
+  td: { padding: 12, fontSize: 14 }
 };
 
 export default Dashboard;

@@ -1,40 +1,65 @@
-const express   = require('express');
-const dotenv    = require('dotenv');
-const cors      = require('cors');
+const express = require('express');
+const dotenv = require('dotenv');
+const cors = require('cors');
 const connectDB = require('./config/db');
 
+// Load env variables
 dotenv.config();
-connectDB();
 
+// Connect to MongoDB
+connectDB()
+  .then(() => console.log("MongoDB Connected Successfully"))
+  .catch((err) => console.error("MongoDB Connection Error:", err.message));
+
+// Load models
 require('./models/User');
 require('./models/Doctor');
 require('./models/Appointment');
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+// Middleware
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api/auth',         require('./routes/authRoutes'));
-app.use('/api/users',        require('./routes/userRoutes'));
-app.use('/api/doctors',      require('./routes/doctorRoutes'));
-app.use('/api/appointments', require('./routes/appointmentRoutes'));
+// Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/doctors', require('./routes/doctorRoutes'));
+app.use('/api/appointments', require('./routes/appointmentRoutes')); // ✅ Correctly added
 
+// Test route
 app.get('/', (req, res) => {
-  res.json({ message: 'MediBook Healthcare API is running', status: 'OK' });
+  res.json({
+    message: 'MediBook Healthcare API is running',
+    status: 'OK'
+  });
 });
 
+// 404 Route handler
 app.use((req, res) => {
-  res.status(404).json({ message: `Route ${req.originalUrl} not found` });
+  res.status(404).json({
+    message: `Route ${req.originalUrl} not found`
+  });
 });
 
+// Error handler middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: err.message || 'Server Error' });
+  console.error("Server Error:", err);
+  res.status(500).json({
+    message: err.message || 'Internal Server Error'
+  });
 });
 
+// PORT
 const PORT = process.env.PORT || 5000;
+
+// Start server
 app.listen(PORT, () => {
-  console.log(`\n🏥  MediBook Server running on http://localhost:${PORT}`);
+  console.log(`🏥 Server running on http://localhost:${PORT}`);
 });
