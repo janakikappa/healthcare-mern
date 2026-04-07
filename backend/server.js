@@ -56,10 +56,14 @@ app.use((err, req, res, next) => {
   });
 });
 
+<<<<<<< HEAD
 // PORT
 const PORT = process.env.PORT || 5000;
 
 // Start server
+=======
+const PORT = process.env.PORT || 5001;
+>>>>>>> 5ea410fc12658fdb637ad2cedf178dbe02957a89
 app.listen(PORT, () => {
   console.log(`🏥 Server running on http://localhost:${PORT}`);
 });
