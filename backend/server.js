@@ -20,7 +20,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'https://healthcare-mern-app-backend.onrender.com',
   credentials: true
 }));
 
