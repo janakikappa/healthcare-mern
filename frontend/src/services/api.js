@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'https://healthcare-mern-app-backend.onrender.com' });
+const API = axios.create({ baseURL: 'https://healthcare-mern-app-backend.onrender.com/api' });
 
 API.interceptors.request.use((config) => {
   const info = JSON.parse(localStorage.getItem('userInfo') || 'null');
